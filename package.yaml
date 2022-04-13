@@ -1,0 +1,57 @@
+name:                mdbook-haskell
+version:             0.1.0.0
+github:              "j-rockel/mdbook-haskell"
+license:             BSD3
+author:              "Jessika Rockel"
+maintainer:          "jrockel@posteo.net"
+copyright:           "2022 Jessika Rockel"
+
+extra-source-files:
+- README.md
+- ChangeLog.md
+
+# Metadata used when publishing your package
+# synopsis:            Short description of your package
+# category:            Web
+
+# To avoid duplicated efforts in documentation and dealing with the
+# complications of embedding Haddock markup inside cabal files, it is
+# common to point users to the README.md file.
+description:         Please see the README on GitHub at <https://github.com/j-rockel/mdbook-haskell#readme>
+
+dependencies:
+- base >= 4.7 && < 5
+- aeson
+- vector
+
+library:
+  source-dirs: src
+  dependencies:
+    - text
+    - lens-aeson
+    - lens
+    - ghc-lib-parser
+    - directory
+
+executables:
+  mdbook-haskell:
+    main:                Main.hs
+    source-dirs:         app
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - bytestring
+    - mdbook-haskell
+
+tests:
+  mdbook-haskell-test:
+    main:                Spec.hs
+    source-dirs:         test
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - mdbook-haskell

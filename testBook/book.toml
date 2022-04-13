@@ -1,0 +1,11 @@
+[book]
+authors = ["Jessika Rockel"]
+language = "en"
+multilingual = false
+src = "src"
+title = "Test"
+
+[preprocessor]
+
+[preprocessor.haskell]
+haskell-project-root = "../"

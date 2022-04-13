@@ -1,0 +1,4 @@
+.stack-work/
+testBook/book/
+*.cabal
+*~
