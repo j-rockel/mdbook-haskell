@@ -1,6 +1,6 @@
 # mdbook-haskell
 
-`mdbook-haskell` is an mdBook preprocessor for easier Haskell code inclusion. Given a file and name, it looks for the definition of the given name in that file and inserts a Haskell codeblock containing the definition (and its associated haddock comments). 
+`mdbook-haskell` is an [mdBook](https://github.com/rust-lang/mdBook) preprocessor for easier Haskell code inclusion. Given a file and name, it looks for the definition of the given name in that file and inserts a Haskell codeblock containing the definition (and its associated haddock comments). 
 
 ## How to use
 
@@ -9,11 +9,12 @@ To build the preprocessor, clone this repository, enter it and call
 ```
 $ stack install
 ```
+(If you don't have stack, ghc etc. installed, you'll need to install those first - I recommend using [ghcup](https://www.haskell.org/ghcup/))
 
 In your `book.toml`, add
 ```
 [preprocessor.haskell]
-haskell-project-root = "<insert relative path from the location of the book.toml to your haskell project's root here>"
+haskell-project-root = "../"
 ```
 
 To add a codeblock to a chapter's markdown file, add
