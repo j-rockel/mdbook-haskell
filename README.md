@@ -21,6 +21,13 @@ To add a codeblock to a chapter's markdown file, add
 ```
 {{#haskell-src <path_to_file> <identifier>}}
 ```
+or
+```
+{{#haskell-src <path_to_file> <identifier> <optional_format>}}
+```
+to one of your `.md` files.
+
+The format options are `full` and `signature` - when using `signature` only the type signature will be included and the value will be omitted (where applicable).
 
 ### Example
 
@@ -34,6 +41,10 @@ haskell-project-root = "<insert relative path from the location of the book.toml
 In `chapter_1.md`:
 ```
 {{#haskell-src src/Modify.hs modifyBook}}
+```
+In `chapter_2.md`:
+```
+{{#haskell-src src/Modify.hs modifyBook signature}}
 ```
 
 ## Capabilities

@@ -20,9 +20,9 @@ import System.Directory
 import System.IO.Unsafe
 
 fulfillRequest :: RequestedSrc -> T.Text
-fulfillRequest (RequestedSrc filename x) =
+fulfillRequest (RequestedSrc filename x format) =
   let parsedModule = parseFileIfExists filename
-      decls = findDecl x parsedModule
+      decls = findDecl x format parsedModule
    in case decls of
         [] -> error $ "No declaration found for " <> T.unpack x
         _ -> formatAsImport filename $ defSpan decls
@@ -50,8 +50,8 @@ parse filename = do
         POk _ lm -> return lm
         PFailed _ -> error $ "Parse failed for " ++ filename
 
-findDecl :: T.Text -> Located HsModule -> [LHsDecl GhcPs]
-findDecl name (L _ (HsModule _ _ _ _ _ decls _ _)) = getDeclsAndComments $ findIndices (defines n) decls
+findDecl :: T.Text -> Format -> Located HsModule -> [LHsDecl GhcPs]
+findDecl name format (L _ (HsModule _ _ _ _ _ decls _ _)) = getDeclsAndComments $ findIndices (defines n format) decls
   where
     n = T.unpack name
     getDeclsAndComments [] = []
@@ -69,17 +69,17 @@ isCommentAfter :: LHsDecl GhcPs -> Bool
 isCommentAfter (L _ (DocD _ (DocCommentPrev _))) = True
 isCommentAfter _ = False
 
-defines :: String -> LHsDecl GhcPs -> Bool
-defines name (L _ (TyClD _ (SynDecl _ id _ _ _))) = idIsName name id
-defines name (L _ (TyClD _ (DataDecl _ id _ _ _))) = idIsName name id
-defines name (L _ (TyClD _ (ClassDecl _ _ id _ _ _ _ _ _ _ _))) = idIsName name id
-defines name (L _ (SigD _ (TypeSig _ ids _))) = any (idIsName name) ids
-defines name (L _ (SigD _ (PatSynSig _ ids _))) = any (idIsName name) ids
-defines name (L _ (SigD _ (ClassOpSig _ _ ids _))) = any (idIsName name) ids
-defines name (L _ (SigD _ (FixSig _ (FixitySig _ ids _)))) = any (idIsName name) ids
-defines name (L _ (ValD _ (FunBind _ id _ _))) = idIsName name id
-defines name (L _ (ValD _ (VarBind _ x _))) = isName name x
-defines _ _ = False
+defines :: String -> Format -> LHsDecl GhcPs -> Bool
+defines name _ (L _ (TyClD _ (SynDecl _ id _ _ _))) = idIsName name id
+defines name _ (L _ (TyClD _ (DataDecl _ id _ _ _))) = idIsName name id
+defines name _ (L _ (TyClD _ (ClassDecl _ _ id _ _ _ _ _ _ _ _))) = idIsName name id
+defines name _ (L _ (SigD _ (TypeSig _ ids _))) = any (idIsName name) ids
+defines name _ (L _ (SigD _ (PatSynSig _ ids _))) = any (idIsName name) ids
+defines name _ (L _ (SigD _ (ClassOpSig _ _ ids _))) = any (idIsName name) ids
+defines name _ (L _ (SigD _ (FixSig _ (FixitySig _ ids _)))) = any (idIsName name) ids
+defines name Full (L _ (ValD _ (FunBind _ id _ _))) = idIsName name id
+defines name Full (L _ (ValD _ (VarBind _ x _))) = isName name x
+defines _ _ _ = False
 
 idIsName :: String -> LIdP GhcPs -> Bool
 idIsName name (L _ x) = isName name x
