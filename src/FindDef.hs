@@ -18,6 +18,7 @@ import GHC.Types.SrcLoc
 import RequestedSrc
 import System.Directory
 import System.IO.Unsafe
+import GHC.LanguageExtensions (Extension(..))
 
 fulfillRequest :: RequestedSrc -> T.Text
 fulfillRequest (RequestedSrc filename x format) =
@@ -44,7 +45,8 @@ parse :: FilePath -> IO (Located HsModule)
 parse filename = do
   buffer <- hGetStringBuffer filename
   let location = mkRealSrcLoc (mkFastString filename) 1 1
-      parserOpts = mkParserOpts empty (fromList []) {- OverloadedStrings, TemplateHaskell -} False True True True
+      extensions = fromList [QuasiQuotes, TemplateHaskell, OverloadedStrings, OverloadedRecordDot]
+      parserOpts = mkParserOpts empty extensions False True True True
       parseState = initParserState parserOpts buffer location
    in case unP parseModule parseState of
         POk _ lm -> return lm
