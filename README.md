@@ -49,5 +49,5 @@ In `chapter_2.md`:
 
 ## Capabilities
 
-The preprocessor is currently built with ghc 9.2.2 and thus should be able to parse syntax allowed up to ghc 9.2.2. It uses the parsing utilities provided by `ghc-lib-parser` to parse the given source file, identify all declarations associated with the given name, combine their source locations and inserting an `{{#import <path_to_file>:<start_line>:<end_line>}}` statement inside a haskell code block, which mdbook then replaces with the respective lines of that source file.
+The preprocessor is currently built with ghc 9.6.4 and thus should be able to parse syntax allowed up to ghc 9.6.4. It uses the parsing utilities provided by `ghc-lib-parser` to parse the given source file, identify all declarations associated with the given name, combine their source locations and inserting an `{{#import <path_to_file>:<start_line>:<end_line>}}` statement inside a haskell code block, which mdbook then replaces with the respective lines of that source file.
 It can retrieve the definition locations of functions, types and typeclasses but currently does not work with Template Haskell splices. If you have an idea how to fix that, I'd love to hear it!

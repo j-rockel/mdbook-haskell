@@ -19,6 +19,8 @@ import RequestedSrc
 import System.Directory
 import System.IO.Unsafe
 import GHC.LanguageExtensions (Extension(..))
+import GHC.Utils.Error (DiagOpts(..))
+import GHC.Utils.Outputable (defaultSDocContext)
 
 fulfillRequest :: RequestedSrc -> T.Text
 fulfillRequest (RequestedSrc filename x format) =
@@ -36,24 +38,32 @@ formatAsImport fp (RealSrcSpan s _) = asHaskellCodeblock $ "{{#include " <> T.pa
     start = T.pack $ show $ srcSpanStartLine s
     end = T.pack $ show $ srcSpanEndLine s
 
-parseFileIfExists :: FilePath -> Located HsModule
+parseFileIfExists :: FilePath -> Located (HsModule GhcPs)
 parseFileIfExists filename = unsafePerformIO $ do
   exists <- doesFileExist filename
   if exists then parse filename else error $ "File " ++ filename ++ " does not exist"
 
-parse :: FilePath -> IO (Located HsModule)
+parse :: FilePath -> IO (Located (HsModule GhcPs))
 parse filename = do
   buffer <- hGetStringBuffer filename
   let location = mkRealSrcLoc (mkFastString filename) 1 1
       extensions = fromList [QuasiQuotes, TemplateHaskell, OverloadedStrings, OverloadedRecordDot]
-      parserOpts = mkParserOpts empty extensions False True True True
+      diagOpts = DiagOpts
+        { diag_warning_flags = empty
+        , diag_fatal_warning_flags = empty
+        , diag_warn_is_error = False
+        , diag_reverse_errors = False
+        , diag_max_errors = Nothing
+        , diag_ppr_ctx = defaultSDocContext
+        }
+      parserOpts = mkParserOpts extensions diagOpts [] False True True True
       parseState = initParserState parserOpts buffer location
    in case unP parseModule parseState of
         POk _ lm -> return lm
         PFailed _ -> error $ "Parse failed for " ++ filename
 
-findDecl :: T.Text -> Format -> Located HsModule -> [LHsDecl GhcPs]
-findDecl name format (L _ (HsModule _ _ _ _ _ decls _ _)) = getDeclsAndComments $ findIndices (defines n format) decls
+findDecl :: T.Text -> Format -> Located (HsModule GhcPs) -> [LHsDecl GhcPs]
+findDecl name format (L _ (HsModule{hsmodDecls = decls})) = getDeclsAndComments $ findIndices (defines n format) decls
   where
     n = T.unpack name
     getDeclsAndComments [] = []
@@ -74,12 +84,12 @@ isCommentAfter _ = False
 defines :: String -> Format -> LHsDecl GhcPs -> Bool
 defines name _ (L _ (TyClD _ (SynDecl _ id _ _ _))) = idIsName name id
 defines name _ (L _ (TyClD _ (DataDecl _ id _ _ _))) = idIsName name id
-defines name _ (L _ (TyClD _ (ClassDecl _ _ id _ _ _ _ _ _ _ _))) = idIsName name id
+defines name _ (L _ (TyClD _ (ClassDecl{tcdLName = id}))) = idIsName name id
 defines name _ (L _ (SigD _ (TypeSig _ ids _))) = any (idIsName name) ids
 defines name _ (L _ (SigD _ (PatSynSig _ ids _))) = any (idIsName name) ids
 defines name _ (L _ (SigD _ (ClassOpSig _ _ ids _))) = any (idIsName name) ids
 defines name _ (L _ (SigD _ (FixSig _ (FixitySig _ ids _)))) = any (idIsName name) ids
-defines name Full (L _ (ValD _ (FunBind _ id _ _))) = idIsName name id
+defines name Full (L _ (ValD _ (FunBind{fun_id = id}))) = idIsName name id
 defines name Full (L _ (ValD _ (VarBind _ x _))) = isName name x
 defines _ _ _ = False
 
