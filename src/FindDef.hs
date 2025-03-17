@@ -21,6 +21,7 @@ import System.IO.Unsafe
 import GHC.LanguageExtensions (Extension(..))
 import GHC.Utils.Error (DiagOpts(..))
 import GHC.Utils.Outputable (defaultSDocContext)
+import GHC.Unit.Module.Warnings (emptyWarningCategorySet)
 
 fulfillRequest :: RequestedSrc -> T.Text
 fulfillRequest (RequestedSrc filename x format) =
@@ -55,6 +56,8 @@ parse filename = do
         , diag_reverse_errors = False
         , diag_max_errors = Nothing
         , diag_ppr_ctx = defaultSDocContext
+        , diag_custom_warning_categories = emptyWarningCategorySet
+        , diag_fatal_custom_warning_categories = emptyWarningCategorySet
         }
       parserOpts = mkParserOpts extensions diagOpts [] False True True True
       parseState = initParserState parserOpts buffer location
@@ -102,6 +105,5 @@ isName name (Qual _ n) = occNameString n == name
 isName name (Orig _ n) = occNameString n == name
 isName name (Exact n) = occNameString (nameOccName n) == name
 
-defSpan = foldr1 combineSrcSpans . map getSpan
-  where
-    getSpan (L (SrcSpanAnn _ span) _) = span
+defSpan :: [GenLocated SrcSpanAnnA a] -> SrcSpan
+defSpan = foldr1 combineSrcSpans . map getLocA

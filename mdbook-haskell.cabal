@@ -1,0 +1,62 @@
+cabal-version: 3.0
+name: mdbook-haskell
+version: 0.1.0.0
+description: Please see the README on GitHub at <https://github.com/j-rockel/mdbook-haskell#readme>
+homepage: https://github.com/j-rockel/mdbook-haskell#readme
+bug-reports: https://github.com/j-rockel/mdbook-haskell/issues
+author: Jessika Rockel
+maintainer: jrockel@posteo.net
+copyright: 2022 Jessika Rockel
+license: BSD-3-Clause
+license-file: LICENSE
+build-type: Simple
+extra-source-files:
+  README.md
+
+source-repository head
+  type: git
+  location: https://github.com/j-rockel/mdbook-haskell
+
+library
+  exposed-modules:
+    FindDef
+    Modify
+    RequestedSrc
+
+  other-modules:
+    Paths_mdbook_haskell
+
+  hs-source-dirs:
+    src
+
+  build-depends:
+    aeson,
+    base >=4.7 && <5,
+    directory,
+    ghc-lib-parser,
+    lens,
+    lens-aeson,
+    text,
+    vector,
+
+  default-language: GHC2021
+
+executable mdbook-haskell
+  main-is: Main.hs
+
+  hs-source-dirs:
+    app
+
+  ghc-options:
+    -threaded
+    -rtsopts
+    -with-rtsopts=-N
+
+  build-depends:
+    aeson,
+    base >=4.7 && <5,
+    bytestring,
+    mdbook-haskell,
+    vector,
+
+  default-language: GHC2021
